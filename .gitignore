@@ -1,0 +1,79 @@
+# ---- Global ignores ----
+*.log
+*.env
+*.pyc
+__pycache__/
+.DS_Store
+.env.local
+.env.*.local
+.vscode/
+.idea/
+*.sqlite3
+
+# ---- Node / React Native (Expo) ----
+node_modules/
+.expo/
+.expo-shared/
+web-build/
+android/
+ios/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Expo generated files
+dist/
+.expo-dev-cache/
+.expo-staging/
+.expo/web/
+.expo/packager-info.json
+.expo/settings.json
+
+# Metro bundler
+.bundle/
+.expo/
+.expo-shared/
+
+# Build outputs
+build/
+coverage/
+
+# ---- Django ----
+# Python
+*.py[cod]
+__pycache__/
+*.pyo
+*.pyd
+
+# Django specific
+*.db
+db.sqlite3
+/staticfiles/
+media/
+static/
+local_settings.py
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Django migrations (optional – only ignore if auto-generated)
+# */migrations/*.py
+# !*/migrations/__init__.py
+
+# ---- OS Specific ----
+Thumbs.db
+ehthumbs.db
+Icon?
+desktop.ini
+
+# ---- Git Specific ----
+*.orig
+*.rej
+
