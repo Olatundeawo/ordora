@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, StyleSheet, TouchableOpacity, Alert, Image } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function Products() {
   const URL = process.env.EXPO_PUBLIC_BASE_URL
@@ -50,7 +50,7 @@ export default function Products() {
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('access');
-              const res = await fetch(`${URL}/goods/${id}/delete/`, {
+              const res = await fetch(`${URL}goods/${id}/delete/`, {
                 method: 'DELETE',
                 headers: { 
                   'Content-Type': 'application/json',

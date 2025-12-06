@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  Modal,
-  ActivityIndicator,
-} from "react-native";
-import { useCart } from "../../context/Cart";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import LottieView from "lottie-react-native";
+import React, { useState } from "react";
+import {
+    ActivityIndicator,
+    FlatList,
+    Image,
+    Modal,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { useCart } from "../../context/Cart";
 const Success = require("../../../assets/Success.json")
 
 export default function CartScreen() {
@@ -30,7 +30,7 @@ export default function CartScreen() {
 
       const items = cart.map((item) => ({
         product: item.id,
-        quantity: item.qty,
+        quality: item.qty,
       }));
 
       const response = await fetch(

@@ -1,17 +1,22 @@
-import { useState, useEffect } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  StyleSheet, 
-  ActivityIndicator 
-} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from "expo-router";
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const URL = process.env.EXPO_PUBLIC_BASE_URL;
+  const router = useRouter()
+  
 
   const fetchOrders = async () => {
     try {
@@ -24,7 +29,7 @@ export default function Orders() {
         },
       });
       const result = await response.json();
-      setOrders(result); // assuming result is an array of orders
+      setOrders(result); 
     } catch (e) {
       console.log(e);
     } finally {
@@ -37,19 +42,25 @@ export default function Orders() {
   }, []);
 
   const renderOrder = ({ item }) => (
+    <TouchableOpacity
+      onPress={() => router.push(`Customer/OrderDetails?id=${item.id}`)}
+      style={styles.card}
+    >
+
     <View style={styles.card}>
       <Text style={styles.orderId}>Order ID: {item.id}</Text>
-      <Text style={styles.date}>Date: {item.date}</Text>
+      <Text style={styles.date}>Date: {item.created_at}</Text>
       <Text style={styles.status}>Status: {item.status}</Text>
       <View style={styles.itemsContainer}>
         {item.items.map((product, index) => (
           <View key={index} style={styles.itemRow}>
             <Text style={styles.productName}>{product.product}</Text>
-            <Text style={styles.quantity}>Qty: {product.quantity}</Text>
+            <Text style={styles.quantity}>Qty: {product.quality}</Text>
           </View>
         ))}
       </View>
     </View>
+        </TouchableOpacity>
   );
 
   if (loading) {

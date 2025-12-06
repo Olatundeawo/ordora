@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Tabs } from "expo-router";
 
 export default function Tablayout() {
   return (
@@ -7,7 +7,7 @@ export default function Tablayout() {
     screenOptions={({ route }) => ({
       // Header style
       headerStyle: {
-        backgroundColor: '#25292e', // Dark professional header
+        backgroundColor: '#FFFFFF', // Dark professional header
         shadowColor: '#000',
         shadowOpacity: 0.1,
         shadowOffset: { width: 0, height: 2 },
@@ -59,8 +59,8 @@ export default function Tablayout() {
   >
         <Tabs.Screen name="Browse" options={{ title: "Browse"}} />
         <Tabs.Screen name="Orders" options={{ title: "Orders"}} />
-        <Tabs.Screen name="QRPayment" options={{ title: "QRPayment"}} />
         <Tabs.Screen name="Carts" options={{ title: "Carts"}} />
+        <Tabs.Screen name="QRPayment" options={{ title: "QRPayment"}} />
         <Tabs.Screen name="Profile" options={{ title: "Profile"}} />
     </Tabs>
   )

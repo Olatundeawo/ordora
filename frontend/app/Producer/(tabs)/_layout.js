@@ -1,5 +1,5 @@
-import { Tabs } from "expo-router";
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Tabs } from "expo-router";
 
 
 
@@ -9,7 +9,7 @@ export default function TabLayout() {
         screenOptions={({ route }) => ({
           // Header styling
           headerStyle: {
-            backgroundColor: '#25292e',
+            backgroundColor: '#ffffff',
             shadowColor: '#000',
             shadowOpacity: 0.1,
             shadowOffset: { width: 0, height: 2 },

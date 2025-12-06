@@ -1,6 +1,6 @@
 
-import {  Alert, } from "react-native"
 import AsyncStorage from '@react-native-async-storage/async-storage'
+import { Alert, } from "react-native"
 
 export default function UseOrder() {
     const URL = process.env.EXPO_PUBLIC_BASE_URL
@@ -15,7 +15,7 @@ export default function UseOrder() {
                 },
                 body: JSON.stringify({
                     product: productId,
-                    quality: quantity
+                    quality: quality
                 })
             })
 
