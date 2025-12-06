@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Goods
-from .models import Order, OrderItem
+from .models import Order, OrderItem, Payment, ProducerWallet
 
 class GoodsSerializer(serializers.ModelSerializer):
     producer = serializers.ReadOnlyField(source='producer.id')
@@ -15,9 +15,12 @@ class GoodsSerializer(serializers.ModelSerializer):
     
 
 class OrderItemSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source="product.name", read_only=True)
+    product_price = serializers.DecimalField(source="product.price", max_digits=10, decimal_places=2, read_only=True)
+
     class Meta:
         model = OrderItem
-        fields = ["product", "quantity"]
+        fields = ["product_name", "product_price","product", "quality"]
 
 
 class OrderSerializer(serializers.ModelSerializer):
@@ -38,19 +41,34 @@ class OrderSerializer(serializers.ModelSerializer):
 
         for item in items_data:
             product = item["product"]
-            quantity = item["quantity"]
+            quality = item["quality"]
             
 
             OrderItem.objects.create(
                 order=order,
                 product=product,
-                quantity=quantity,
+                quality=quality,
                 
             )
 
-            total += product.price * quantity
+            total += product.price * quality
 
         order.total_price = total
         order.save()
 
         return order
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Payment
+        fields = ["id", "order", "reference", "amount", "status", "qr_code", "created_at"]
+        read_only_fields = ["id", "order", "reference", "status", "qr_code", "created_at"]
+
+
+class ProducerWalletSerializer(serializers.ModelSerializer):
+    producer_name = serializers.ReadOnlyField(source="producer.username")
+
+    class Meta:
+        model = ProducerWallet
+        fields = ["producer", "producer_name", "balance"]

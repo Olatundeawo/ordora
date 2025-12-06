@@ -62,7 +62,28 @@ class OrderItem(models.Model):
         on_delete=models.CASCADE
     )
     product = models.ForeignKey(Goods, on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField(default=1)
+    quality = models.PositiveIntegerField(default=1)
 
     def __str__(self):
-        return f"{self.product.name} x{self.quantity}"
+        return f"{self.product.name} x{self.quality}"
+    
+
+class Payment(models.Model):
+    order = models.OneToOneField(Order, on_delete=models.CASCADE, related_name="payment")
+    reference = models.CharField(max_length=100)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(
+        max_length=20,
+        choices=[("pending", "Pending"), ("paid", "Paid"), ("failed", "Failed")],
+        default="pending"
+    )
+    qr_code = models.TextField(null=True, blank=True)  # base64 QR from Paystack
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+class ProducerWallet(models.Model):
+    producer = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    balance = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+
+    def __str__(self):
+        return f"{self.producer.username} - Balance: {self.balance}"

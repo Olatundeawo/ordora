@@ -23,7 +23,7 @@ class LoginView(generics.GenericAPIView):
         user = serializer.validated_data
         refresh = RefreshToken.for_user(user)
         return Response({
-            "user": {"email": user.email, "role": user.role, "name": user.name},
+            "user": {"id": user.id,"email": user.email, "role": user.role, "name": user.name},
             "refresh": str(refresh),
             "access": str(refresh.access_token)
         })

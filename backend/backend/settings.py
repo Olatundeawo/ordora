@@ -12,9 +12,16 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+# for paystack
+FLUTTERWAVE_WEBHOOK_SECRET = "awotimilehinbabatunde"
+FLW_SECRET_KEY = "FLWSECK_TEST-464f61d8ee0f7cf48e4abe5c5ef3b7e8-X"#"FLWPUBK_TEST-c10745fd188162447a8f5f036a4b8d33-X"
+FLW_SANDBOX = True
 
 
 # Quick-start development settings - unsuitable for production
@@ -26,7 +33,7 @@ SECRET_KEY = 'django-insecure-)0=y*#-5+-7&b_=h14qura0h%!4^gn_4l)-ug06etufp!s13!0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
