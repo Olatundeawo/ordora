@@ -3,17 +3,15 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 import json
-import hmac
-import hashlib
 import requests
-from rest_framework import generics, permissions, status
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 from .models import Goods, Order, Payment, ProducerWallet
 from .serializers import GoodsSerializer, OrderSerializer, PaymentSerializer, ProducerWalletSerializer
 from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-import pprint
+
 from django.utils import timezone
 
 

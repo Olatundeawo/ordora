@@ -4,6 +4,7 @@ from .models import Order, OrderItem, Payment, ProducerWallet
 
 class GoodsSerializer(serializers.ModelSerializer):
     producer = serializers.ReadOnlyField(source='producer.id')
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Goods

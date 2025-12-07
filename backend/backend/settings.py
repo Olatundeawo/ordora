@@ -12,16 +12,24 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+load_dotenv()
 
-# for paystack
-FLUTTERWAVE_WEBHOOK_SECRET = "awotimilehinbabatunde"
-FLW_SECRET_KEY = "FLWSECK_TEST-464f61d8ee0f7cf48e4abe5c5ef3b7e8-X"#"FLWPUBK_TEST-c10745fd188162447a8f5f036a4b8d33-X"
+# for flutterwave
+FLUTTERWAVE_WEBHOOK_SECRET = os.getenv("FLUTTERWAVE_WEBHOOK_SECRET")
+FLW_SECRET_KEY = os.getenv("FLW_SECRET_KEY")
 FLW_SANDBOX = True
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.getenv("CLOUD_NAME"),
+    'API_KEY': os.getenv("API_KEY"),
+    'API_SECRET': os.getenv("API_SECRET")
+}
 
 
 # Quick-start development settings - unsuitable for production
@@ -33,7 +41,7 @@ SECRET_KEY = 'django-insecure-)0=y*#-5+-7&b_=h14qura0h%!4^gn_4l)-ug06etufp!s13!0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+
 
 
 # Application definition
@@ -50,6 +58,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'corsheaders',
+    'cloudinary',
+    'cloudinary_storage',
 ]
 
 MIDDLEWARE = [
@@ -176,3 +186,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+MEDIA_URL = '/media/'
