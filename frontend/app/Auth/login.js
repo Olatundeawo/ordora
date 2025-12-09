@@ -3,11 +3,13 @@ import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
   Alert,
+  KeyboardAvoidingView,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { useAuth } from "../context/auth";
 
@@ -15,6 +17,8 @@ export default function Login() {
   const URL = process.env.EXPO_PUBLIC_BASE_URL
   const router = useRouter();
   const { setUser } = useAuth();
+
+  const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
     email: "",
@@ -26,6 +30,8 @@ export default function Login() {
   };
 
   const handleSubmit = async () => {
+
+    setLoading(true);
     
     try {
 
@@ -41,12 +47,13 @@ export default function Login() {
         }
       );
 
+      const result = await response.json();
       if (!response.ok) {
-        Alert.alert("Login Failed", `Status Code: ${response.status}`);
+        Alert.alert("Login Failed", result?.non_field_errors?.[0] || result?.email?.[0] || "Something went wrong");
+        setLoading(false);
         return;
       }
 
-      const result = await response.json();
 
       // Save tokens
       await AsyncStorage.setItem("access", result.access);
@@ -73,10 +80,16 @@ export default function Login() {
     } catch (e) {
       console.error(e);
       Alert.alert("Network Error", "Unable to connect to the server.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
+    <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === "ios" ? "padding" : "height"}
+  >
     <View style={styles.container}>
       <Text style={styles.title}>Welcome Back 👋</Text>
       <Text style={styles.subtitle}>Login to your account</Text>
@@ -106,7 +119,7 @@ export default function Login() {
       </View>
 
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Login</Text>
+        <Text style={styles.buttonText}>{loading ? "Login..." : "Login"}</Text>
       </TouchableOpacity>
 
       <Text style={styles.footerText}>
@@ -116,6 +129,7 @@ export default function Login() {
         </Text>
       </Text>
     </View>
+    </KeyboardAvoidingView>
   );
 }
 

@@ -1,9 +1,9 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView } from 'react-native';
-import { useAuth } from '../../context/auth';
+import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
-import { Feather } from '@expo/vector-icons';
+import React from 'react';
+import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useAuth } from '../../context/auth';
 
 export default function Profile() {
   const { user, setUser } = useAuth();
@@ -20,14 +20,27 @@ export default function Profile() {
     }
   };
 
+  console.log("usre:", user)
+
+  const formatDateTime = (iso) => {
+    const date = new Date(iso);
+    return (
+      date.toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    );
+  };
+
   return (
     <ScrollView style={styles.container}>
-      {/* Header */}
+     
       <View style={styles.header}>
         <Text style={styles.headerText}>Profile</Text>
       </View>
 
-      {/* Profile Card */}
+      
       {user && (
         <View style={styles.card}>
           <Image
@@ -46,13 +59,13 @@ export default function Profile() {
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Joined</Text>
-              <Text style={styles.value}>{user.joined || 'Jan 1, 2025'}</Text>
+              <Text style={styles.value}>{formatDateTime(user.date_joined)}</Text>
             </View>
 
-            {/* You can add more info rows here, like phone, balance, etc */}
+            
           </View>
 
-          {/* Edit Button */}
+          
           <TouchableOpacity style={styles.editButton}>
             <Feather name="edit-2" size={20} color="#007AFF" />
             <Text style={styles.editText}>Edit Profile</Text>
@@ -60,7 +73,7 @@ export default function Profile() {
         </View>
       )}
 
-      {/* Logout */}
+      
       <TouchableOpacity style={styles.logoutButton} onPress={logOut}>
         <Text style={styles.logoutText}>Log Out</Text>
       </TouchableOpacity>
@@ -71,7 +84,7 @@ export default function Profile() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1B1E23', // dark fintech background
+    backgroundColor: '#1B1E23', 
   },
   header: {
     paddingTop: 60,

@@ -1,19 +1,21 @@
+import { Picker } from "@react-native-picker/picker";
+import { Link, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
+  View,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import { Link, useRouter } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../context/auth";
 
 export default function Register() {
-  const URL = process.env.EXPO_PUBLIC_BASE_URL
+  const URL = process.env.EXPO_PUBLIC_BASE_URL;
   const router = useRouter();
   const { setUser } = useAuth();
 
@@ -24,6 +26,8 @@ export default function Register() {
     role: "",
   });
 
+  const [loading, setLoading] = useState(false); 
+
   const handleChange = (field, value) => {
     setForm({ ...form, [field]: value });
   };
@@ -33,125 +37,134 @@ export default function Register() {
       Alert.alert("Validation Error", "Please fill all fields");
       return;
     }
-
+  
+    setLoading(true);
+  
     try {
-      const response = await fetch(
-        `${URL}auth/register/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: form.email,
-            name: form.name,
-            password: form.password,
-            role: form.role,
-          }),
-        }
-      );
+      const response = await fetch(`${URL}auth/register/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email,
+          name: form.name,
+          password: form.password,
+          role: form.role,
+        }),
+      });
+  
+      const result = await response.json();
 
+      console.log("result", result)
       if (!response.ok) {
-        const errorData = await response.json();
-        Alert.alert("Registration Failed", errorData.message || "Error");
+        Alert.alert(
+          "Registration Failed",
+          result?.non_field_errors?.[0] ||
+          result?.email?.[0] ||
+          "Something went wrong"
+        );
+        setLoading(false);
         return;
       }
-
-      const result = await response.json();
-      console.log('the result:', result)
-
-      // Save tokens
-      await AsyncStorage.setItem("access", JSON.stringify(result.access));
-      await AsyncStorage.setItem("refresh", JSON.stringify(result.refresh));
-
-      const userData = result.user; // Must include { email, role }
-      setUser({ ...userData, token: result.access });
-
+  
       Alert.alert("Success", "Account created successfully!");
-
-      // Role-based redirect
-      if (userData.role === "producer") {
-        router.replace("/Producer/(tabs)/Dashboard");
-      } else {
-        router.replace("/Customer/(tabs)/Browse");
-      }
+  
+      router.replace("Auth/login");
+      
     } catch (err) {
       console.error(err);
       Alert.alert("Network Error", "Unable to connect to the server");
+    } finally {
+      setLoading(false);
     }
   };
+  
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Create Account ✨</Text>
-      <Text style={styles.subtitle}>Register to get started</Text>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        keyboardShouldPersistTaps="handled"
+      >
+        <Text style={styles.title}>Create Account ✨</Text>
+        <Text style={styles.subtitle}>Register to get started</Text>
 
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Email</Text>
-        <TextInput
-          placeholder="Enter your email"
-          placeholderTextColor="#999"
-          keyboardType="email-address"
-          value={form.email}
-          onChangeText={(text) => handleChange("email", text)}
-          style={styles.input}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Fullname</Text>
-        <TextInput
-        placeholder="Enter your full name"
-        placeholderTextColor="#999"
-        keyboardType="normal"
-        value={form.name}
-        onChangeText={(text) => handleChange('name', text)}
-        style={styles.input}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>Password</Text>
-        <TextInput
-          placeholder="Enter your password"
-          placeholderTextColor="#999"
-          secureTextEntry
-          value={form.password}
-          onChangeText={(text) => handleChange("password", text)}
-          style={styles.input}
-        />
-      </View>
-
-      <View style={styles.inputGroup}>
-        <Text style={styles.label}>User Role</Text>
-        <View style={styles.pickerContainer}>
-          <Picker
-            selectedValue={form.role}
-            onValueChange={(value) => handleChange("role", value)}
-            style={styles.picker}
-          >
-            <Picker.Item label="Select a role" value="" />
-            <Picker.Item label="Business" value="producer" />
-            <Picker.Item label="Personal" value="customer" />
-          </Picker>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Email</Text>
+          <TextInput
+            placeholder="Enter your email"
+            placeholderTextColor="#999"
+            keyboardType="email-address"
+            value={form.email}
+            onChangeText={(text) => handleChange("email", text)}
+            style={styles.input}
+          />
         </View>
-      </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>Register</Text>
-      </TouchableOpacity>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Fullname</Text>
+          <TextInput
+            placeholder="Enter your full name"
+            placeholderTextColor="#999"
+            value={form.name}
+            onChangeText={(text) => handleChange("name", text)}
+            style={styles.input}
+          />
+        </View>
 
-      <Text style={styles.footerText}>
-        Already have an account?{" "}
-        <Text style={styles.link}>
-          <Link href="Auth/login">Login</Link>
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>Password</Text>
+          <TextInput
+            placeholder="Enter your password"
+            placeholderTextColor="#999"
+            secureTextEntry
+            value={form.password}
+            onChangeText={(text) => handleChange("password", text)}
+            style={styles.input}
+          />
+        </View>
+
+        <View style={styles.inputGroup}>
+          <Text style={styles.label}>User Role</Text>
+          <View style={styles.pickerContainer}>
+            <Picker
+              selectedValue={form.role}
+              onValueChange={(value) => handleChange("role", value)}
+              style={styles.picker}
+            >
+              <Picker.Item label="Select a role" value="" />
+              <Picker.Item label="Business" value="producer" />
+              <Picker.Item label="Personal" value="customer" />
+            </Picker>
+          </View>
+        </View>
+
+        <TouchableOpacity
+          style={[styles.button, loading && { backgroundColor: "#999" }]}
+          onPress={handleSubmit}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Registering..." : "Register"}
+          </Text>
+        </TouchableOpacity>
+
+        <Text style={styles.footerText}>
+          Already have an account?{" "}
+          <Text style={styles.link}>
+            <Link href="Auth/login">Login</Link>
+          </Text>
         </Text>
-      </Text>
-    </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 24,
     justifyContent: "center",

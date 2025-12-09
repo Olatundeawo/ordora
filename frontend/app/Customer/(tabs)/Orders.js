@@ -4,11 +4,13 @@ import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
+  RefreshControl,
   StyleSheet,
   Text,
   TouchableOpacity,
   View
 } from 'react-native';
+import { apiFetch } from "../../context/utils/api";
 
 
 export default function Orders() {
@@ -16,31 +18,46 @@ export default function Orders() {
   const [loading, setLoading] = useState(true);
   const URL = process.env.EXPO_PUBLIC_BASE_URL;
   const router = useRouter()
+  const [refreshing, setRefreshing] = useState(false);
   
 
   const fetchOrders = async () => {
     try {
       const token = await AsyncStorage.getItem("access");
-      const response = await fetch(`${URL}goods/customer/order/`, {
+      const response = await apiFetch(`goods/customer/order/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
+  
       const result = await response.json();
-      setOrders(result); 
+  
+     
+      const sortedOrders = result.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+  
+      setOrders(sortedOrders);
+  
     } catch (e) {
       console.log(e);
     } finally {
       setLoading(false);
     }
   };
+  
 
   useEffect(() => {
     fetchOrders();
   }, []);
 
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchOrders();
+  };
+  
   const renderOrder = ({ item }) => (
     <TouchableOpacity
       onPress={() => router.push(`Customer/OrderDetails?id=${item.id}`)}
@@ -87,6 +104,9 @@ export default function Orders() {
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderOrder}
         contentContainerStyle={{ paddingBottom: 20 }}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       />
     </View>
   );

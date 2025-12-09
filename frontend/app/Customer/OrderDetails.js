@@ -1,11 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useLocalSearchParams } from "expo-router";
+import { Link, useLocalSearchParams } from "expo-router";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Image, Text, TouchableOpacity, View } from "react-native";
+import { apiFetch } from "../context/utils/api";
 
 export default function OrderDetails() {
   const { id } = useLocalSearchParams();
-  const URL = process.env.EXPO_PUBLIC_BASE_URL;
+  
   
   const [order, setOrder] = useState(null);
   const [qr, setQr] = useState(null);
@@ -18,7 +19,7 @@ export default function OrderDetails() {
 
   const fetchOrder = async () => {
     const token = await AsyncStorage.getItem("access");
-    const response = await fetch(`${URL}goods/customer/order/${id}/`, {
+    const response = await apiFetch(`goods/customer/order/${id}/`, {
       headers: { Authorization: `Bearer ${token}` }
     });
     const result = await response.json();
@@ -31,7 +32,7 @@ export default function OrderDetails() {
     setPaying(true);
     const token = await AsyncStorage.getItem("access");
 
-    const response = await fetch(`${URL}goods/payments/create-qr/${id}/`, {
+    const response = await apiFetch(`goods/payments/create-qr/${id}/`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -63,26 +64,41 @@ export default function OrderDetails() {
         <View style={{ marginTop: 20 }}>
           <Text style={{ fontSize: 16 }}>Scan QR to Pay</Text>
           <Image
-            source={{ uri: qr.qr_image }}
+            source={{ uri: qr.qr_code }}
             style={{ width: 200, height: 200, marginVertical: 20 }}
           />
           <Text>Reference: {qr.reference}</Text>
           <Text>Amount: {qr.amount}</Text>
+          <Link
+            href="Customer/QRPayment"
+            style={{ 
+              color: "#007AFF", 
+              fontWeight: "bold",
+              textDecorationLine: "underline",
+              fontSize: 16,
+              marginTop: 10
+            }}
+                  >
+           Go To Payment section
+        </Link>
         </View>
       ) : (
         <TouchableOpacity
-          onPress={handleQrPayment}
-          style={{
-            backgroundColor: "#007AFF",
-            padding: 15,
-            borderRadius: 10,
-            marginTop: 30,
-          }}
-        >
-          <Text style={{ color: "#fff", textAlign: "center", fontWeight: "bold" }}>
-            {paying ? "Generating QR..." : "Generate QR"}
-          </Text>
-        </TouchableOpacity>
+        onPress={handleQrPayment}
+        disabled={paying}  
+        style={{
+          backgroundColor: paying ? "#9BBDF5" : "#007AFF",
+          padding: 15,
+          borderRadius: 10,
+          marginTop: 30,
+          opacity: paying ? 0.6 : 1,
+        }}
+      >
+        <Text style={{ color: "#fff", textAlign: "center", fontWeight: "bold" }}>
+          {paying ? "Generating QR..." : "Generate QR"}
+        </Text>
+</TouchableOpacity>
+
       )}
     </View>
   );

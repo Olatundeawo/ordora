@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from cloudinary.models import CloudinaryField
+from cloudinary import uploader
 
 # Create your models here.
 class Goods(models.Model):
@@ -22,6 +23,15 @@ class Goods(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def delete(self, *args, **kwargs):
+        if self.image:
+            try:
+                # Delete image from Cloudinary
+                uploader.destroy(self.image.public_id)
+            except Exception as e:
+                print("Error deleting image from Cloudinary:", e)
+        super().delete(*args, **kwargs)
 
 
 class Order(models.Model):
@@ -82,6 +92,7 @@ class Payment(models.Model):
     )
     qr_code = models.TextField(null=True, blank=True)  # base64 QR from Paystack
     created_at = models.DateTimeField(auto_now_add=True)
+    paid_at = models.DateTimeField(null=True, blank=True)
 
 
 class ProducerWallet(models.Model):

@@ -2,19 +2,30 @@ import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
+} from 'react-native';
+import { apiFetch } from "../../context/utils/api";
 
 export default function Products() {
-  const URL = process.env.EXPO_PUBLIC_BASE_URL
+  const URL = process.env.EXPO_PUBLIC_BASE_URL;
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const router = useRouter();
 
-  // Fetch producer goods
+ 
   const fetchProducts = async () => {
     try {
       const token = await AsyncStorage.getItem('access');
-      const res = await fetch(`${URL}goods/me/`, {
+      const res = await apiFetch(`goods/me/`, {
         method: 'GET',
         headers: { 
           'Content-Type': 'application/json',
@@ -30,6 +41,7 @@ export default function Products() {
       Alert.alert('Error', 'Unable to fetch products.');
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -37,7 +49,12 @@ export default function Products() {
     fetchProducts();
   }, []);
 
-  // Delete a product
+  const onRefresh = () => {
+    setRefreshing(true);
+    fetchProducts();
+  };
+
+  
   const deleteProduct = async (id) => {
     Alert.alert(
       'Delete Product',
@@ -50,7 +67,7 @@ export default function Products() {
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('access');
-              const res = await fetch(`${URL}goods/${id}/delete/`, {
+              const res = await apiFetch(`goods/${id}/delete/`, {
                 method: 'DELETE',
                 headers: { 
                   'Content-Type': 'application/json',
@@ -73,9 +90,9 @@ export default function Products() {
 
   const renderItem = ({ item }) => (
     <TouchableOpacity
-    style={styles.card}
-    onPress={() => router.push(`/Producer/ProductDetails?id=${item.id}`)}
-  >
+      style={styles.card}
+      onPress={() => router.push(`/Producer/ProductDetails?id=${item.id}`)}
+    >
       <Image
         source={{ uri: item.image || 'https://via.placeholder.com/60' }}
         style={styles.image}
@@ -104,7 +121,9 @@ export default function Products() {
       <Text style={styles.header}>My Products</Text>
 
       {loading ? (
-        <Text style={{ color: '#fff', textAlign: 'center', marginTop: 20 }}>Loading...</Text>
+        <Text style={{ color: '#000', textAlign: 'center', marginTop: 20 }}>
+          Loading...
+        </Text>
       ) : products.length === 0 ? (
         <Text style={{ color: '#A0A3A8', textAlign: 'center', marginTop: 20 }}>
           No products added yet.
@@ -115,10 +134,13 @@ export default function Products() {
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 100 }}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }
         />
       )}
 
-      {/* Floating Add Button */}
+      
       <TouchableOpacity
         style={styles.addButton}
         onPress={() => router.push('/Producer/AddProduct')}
@@ -135,14 +157,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#F7F8FA',
     padding: 20,
   },
-
   header: {
     fontSize: 26,
     fontWeight: '700',
     color: '#1A1D1F',
     marginBottom: 20,
   },
-
   card: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -156,7 +176,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
-
   image: {
     width: 65,
     height: 65,
@@ -164,48 +183,40 @@ const styles = StyleSheet.create({
     marginRight: 15,
     backgroundColor: '#F0F0F0',
   },
-
   info: {
     flex: 1,
   },
-
   name: {
     color: '#1A1D1F',
     fontSize: 17,
     fontWeight: '600',
   },
-
   price: {
     color: '#4D5561',
     marginTop: 6,
     fontSize: 15,
     fontWeight: '500',
   },
-
   quantity: {
     color: '#9AA0A6',
     marginTop: 3,
     fontSize: 13,
   },
-
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-
   editBtn: {
     backgroundColor: '#E8F0FF',
     padding: 8,
     borderRadius: 10,
     marginRight: 10,
   },
-
   deleteBtn: {
     backgroundColor: '#FFE8E8',
     padding: 8,
     borderRadius: 10,
   },
-
   addButton: {
     position: 'absolute',
     bottom: 30,
@@ -223,4 +234,3 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 });
-

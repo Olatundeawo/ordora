@@ -1,13 +1,14 @@
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { Alert, } from "react-native"
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Alert, } from "react-native";
+import { apiFetch } from "../context/utils/api";
 
 export default function UseOrder() {
     const URL = process.env.EXPO_PUBLIC_BASE_URL
      const createOrder = async (productId, quantity) => {
          try {
             const access = await AsyncStorage.getItem("access")
-            const response = await fetch(`${URL}goods/create/order/`, {
+            const response = await apiFetch(`goods/create/order/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

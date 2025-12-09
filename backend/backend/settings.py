@@ -14,6 +14,8 @@ from pathlib import Path
 from datetime import timedelta
 import os
 from dotenv import load_dotenv
+import cloudinary
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,11 +27,15 @@ FLUTTERWAVE_WEBHOOK_SECRET = os.getenv("FLUTTERWAVE_WEBHOOK_SECRET")
 FLW_SECRET_KEY = os.getenv("FLW_SECRET_KEY")
 FLW_SANDBOX = True
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.getenv("CLOUD_NAME"),
-    'API_KEY': os.getenv("API_KEY"),
-    'API_SECRET': os.getenv("API_SECRET")
-}
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+cloudinary.config(
+    cloud_name=os.getenv("CLOUD_NAME"),
+    api_key=os.getenv("API_KEY"),
+    api_secret= os.getenv("API_SECRET"),
+    secure=True
+)
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -187,6 +193,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/media/'

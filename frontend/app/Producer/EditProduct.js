@@ -1,17 +1,18 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
 import {
-  View,
+  ScrollView,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  ScrollView,
+  View,
 } from 'react-native';
-import { useRouter, useLocalSearchParams } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { apiFetch } from "../context/utils/api";
 
 export default function EditProduct() {
-  const URL = process.env.EXPO_PUBLIC_BASE_URL
+
   const router = useRouter();
   const { id } = useLocalSearchParams();
 
@@ -26,7 +27,7 @@ export default function EditProduct() {
     const fetchProduct = async () => {
       try {
         const token = await AsyncStorage.getItem('access');
-        const res = await fetch(`${URL}goods/${id}/`, {
+        const res = await apiFetch(`goods/${id}/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -52,8 +53,8 @@ export default function EditProduct() {
   const handleSubmit = async () => {
     try {
       const token = await AsyncStorage.getItem('access');
-      const res = await fetch(
-        `${URL}goods/${id}/update/`,
+      const res = await apiFetch(
+        `goods/${id}/update/`,
         {
           method: 'PUT',
           headers: {
@@ -130,7 +131,7 @@ export default function EditProduct() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F7FA', // fintech clean background
+    backgroundColor: '#F5F7FA', 
     padding: 20,
   },
 

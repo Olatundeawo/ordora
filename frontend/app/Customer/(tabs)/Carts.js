@@ -1,21 +1,28 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import LottieView from "lottie-react-native";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    Modal,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
+
+
+const Lottie = Platform.OS === "web"
+  ? require("lottie-react").default
+  : require("lottie-react-native");
+
 import { useCart } from "../../context/Cart";
-const Success = require("../../../assets/Success.json")
+import { apiFetch } from "../../context/utils/api";
+
+const Success = require("../../../assets/Success.json");
 
 export default function CartScreen() {
-  const URL = process.env.EXPO_PUBLIC_BASE_URL
   const { cart, removeFromCart, clearCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [successVisible, setSuccessVisible] = useState(false);
@@ -33,17 +40,14 @@ export default function CartScreen() {
         quality: item.qty,
       }));
 
-      const response = await fetch(
-        `${URL}goods/create/order/`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify({ items }),
-        }
-      );
+      const response = await apiFetch(`goods/create/order/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ items }),
+      });
 
       if (!response.ok) {
         setLoading(false);
@@ -51,15 +55,14 @@ export default function CartScreen() {
         return;
       }
 
-      // Smooth fintech success effect
       setLoading(false);
       setSuccessVisible(true);
 
-      // Auto close animation + clear cart
       setTimeout(() => {
         setSuccessVisible(false);
         clearCart();
       }, 2200);
+
     } catch (error) {
       console.log("Checkout error:", error);
       setLoading(false);
@@ -114,7 +117,7 @@ export default function CartScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Loading Spinner Modal */}
+      {/* Loading Spinner */}
       <Modal transparent visible={loading}>
         <View style={styles.modalContainer}>
           <View style={styles.spinnerCard}>
@@ -124,10 +127,10 @@ export default function CartScreen() {
         </View>
       </Modal>
 
-      {/* Success Animation Modal */}
+      {/* Success Animation */}
       <Modal transparent visible={successVisible} animationType="fade">
         <View style={styles.modalContainer}>
-          <LottieView
+          <Lottie
             source={Success}
             autoPlay
             loop={false}
@@ -141,29 +144,11 @@ export default function CartScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#F7F8FA",
-    padding: 20,
-  },
+  container: { flex: 1, backgroundColor: "#F7F8FA", padding: 20 },
 
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyText: {
-    fontSize: 22,
-    fontWeight: "700",
-    color: "#333",
-    marginBottom: 8,
-  },
-  emptySubText: {
-    fontSize: 16,
-    color: "#777",
-    textAlign: "center",
-    paddingHorizontal: 20,
-  },
+  emptyContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
+  emptyText: { fontSize: 22, fontWeight: "700", color: "#333", marginBottom: 8 },
+  emptySubText: { fontSize: 16, color: "#777", textAlign: "center", paddingHorizontal: 20 },
 
   itemCard: {
     flexDirection: "row",
@@ -177,35 +162,13 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     shadowRadius: 6,
   },
-  itemImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 12,
-    marginRight: 12,
-  },
-  itemDetails: {
-    flex: 1,
-  },
-  itemName: {
-    fontSize: 16,
-    fontWeight: "600",
-  },
-  itemPrice: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#007AFF",
-  },
+  itemImage: { width: 60, height: 60, borderRadius: 12, marginRight: 12 },
+  itemDetails: { flex: 1 },
+  itemName: { fontSize: 16, fontWeight: "600" },
+  itemPrice: { fontSize: 14, fontWeight: "500", color: "#007AFF" },
 
-  removeBtn: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    backgroundColor: "#FF3B30",
-    borderRadius: 8,
-  },
-  removeText: {
-    color: "#fff",
-    fontWeight: "700",
-  },
+  removeBtn: { paddingHorizontal: 10, paddingVertical: 6, backgroundColor: "#FF3B30", borderRadius: 8 },
+  removeText: { color: "#fff", fontWeight: "700" },
 
   footer: {
     position: "absolute",
@@ -217,42 +180,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
   },
-  totalText: {
-    fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 12,
-  },
-  checkoutBtn: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 15,
-    borderRadius: 12,
-    alignItems: "center",
-  },
-  checkoutText: {
-    color: "#fff",
-    fontSize: 18,
-    fontWeight: "700",
-  },
 
-  modalContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0,0,0,0.4)",
-  },
+  totalText: { fontSize: 18, fontWeight: "700", marginBottom: 12 },
+  checkoutBtn: { backgroundColor: "#007AFF", paddingVertical: 15, borderRadius: 12, alignItems: "center" },
+  checkoutText: { color: "#fff", fontSize: 18, fontWeight: "700" },
 
-  spinnerCard: {
-    width: 140,
-    backgroundColor: "#fff",
-    padding: 20,
-    borderRadius: 16,
-    alignItems: "center",
-  },
+  modalContainer: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "rgba(0,0,0,0.4)" },
+  spinnerCard: { width: 140, backgroundColor: "#fff", padding: 20, borderRadius: 16, alignItems: "center" },
 
-  successText: {
-    marginTop: 10,
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
-  },
+  successText: { marginTop: 10, fontSize: 18, fontWeight: "700", color: "#fff" },
 });

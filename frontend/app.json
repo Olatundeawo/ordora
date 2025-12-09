@@ -1,10 +1,18 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Ordora",
+    "slug": "Ordora",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "sdkVersion"
+    },
     "orientation": "portrait",
-    "icon": "./assets/images/ic.png",
+    "icon": "./assets/images/splash-icon.png",
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,36 +21,42 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+        "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "static"
     },
     "plugins": [
       "expo-router",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#232323",
+          "image": "./assets/images/splash-icon.png",
           "dark": {
+            "image": "./assets/images/splash-icon-dark.png",
             "backgroundColor": "#000000"
-          }
+          },
+          "imageWidth": 200
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1e8b5862-fc63-47bf-a461-a00b31afdbf5"
+      }
+    },
+    "owner": "olatundeawo",
+    "updates": {
+      "url": "https://u.expo.dev/1e8b5862-fc63-47bf-a461-a00b31afdbf5"
     }
   }
 }

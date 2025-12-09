@@ -1,17 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { apiFetch } from "../../context/utils/api";
 
 export default function Dashboard() {
   const [quantity, setQuantity] = useState(0);
   const [orders, setOrders] = useState([]);
   const [total, setTotal] = useState(0);
-  const URL = process.env.EXPO_PUBLIC_BASE_URL;
+  
 
   const fetchProducts = async () => {
     try {
       const token = await AsyncStorage.getItem('access');
-      const res = await fetch(`${URL}goods/me/`, {
+      const res = await apiFetch(`goods/me/`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
@@ -28,7 +29,7 @@ export default function Dashboard() {
   const fetchOrders = async () => {
     try {
       const token = await AsyncStorage.getItem("access");
-      const res = await fetch(`${URL}goods/producer/order/`, {
+      const res = await apiFetch(`goods/producer/order/`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -37,7 +38,6 @@ export default function Dashboard() {
 
       const result = await res.json();
 
-      // Ensure result is array
       const list = Array.isArray(result) ? result : result?.results || [];
 
       const paidOrders = list.filter((item) => item.status === "PAID");
@@ -66,7 +66,7 @@ export default function Dashboard() {
     <View style={styles.container}>
       <Text style={styles.header}>Dashboard</Text>
 
-      {/* TOP CARDS */}
+      
       <View style={styles.statsContainer}>
         
         <View style={[styles.statCard, { borderLeftColor: "#3B82F6" }]}>
@@ -88,7 +88,7 @@ export default function Dashboard() {
 
       <Text style={styles.subHeader}>Recent Orders</Text>
 
-      {/* HEADINGS */}
+     
       <View style={styles.orderHeaderRow}>
         <Text style={[styles.orderHeaderText, { flex: 1 }]}>Order ID</Text>
         <Text style={[styles.orderHeaderText, { flex: 1 }]}>Date</Text>
@@ -96,7 +96,7 @@ export default function Dashboard() {
         <Text style={[styles.orderHeaderText, { flex: 1 }]}>Status</Text>
       </View>
 
-      {/* ORDER LIST */}
+     
       {lastFiveOrders.map((order) => (
         <View style={styles.orderRow} key={order.id}>
           <Text style={[styles.orderValue, { flex: 1 }]}>#{order.id}</Text>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 25,
   },
 
-  // ===== CARDS =====
+ 
   statsContainer: {
     flexDirection: "column",
     gap: 12,
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
 
-  // ===== RECENT ORDERS =====
+  
   subHeader: {
     fontSize: 20,
     color: "#FFF",

@@ -1,18 +1,18 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
 import {
-  View,
+  Alert,
+  Image,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  StyleSheet,
-  Alert,
-  Image
+  View
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-// import * as ImagePicker from "expo-image-picker";
+import { apiFetch } from "../context/utils/api";
 
 export default function AddProduct() {
-  const URL = process.env.EXPO_PUBLIC_BASE_URL
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -20,27 +20,27 @@ export default function AddProduct() {
     quality: "",
   });
 
-//   const [image, setImage] = useState(null);
+  const [image, setImage] = useState(null); 
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field, value) => {
     setForm({ ...form, [field]: value });
   };
 
-  // === Pick Image ===
-//   const pickImage = async () => {
-//     let result = await ImagePicker.launchImageLibraryAsync({
-//       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-//       allowsEditing: true,
-//       quality: 1,
-//     });
+  
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      quality: 1,
+    });
 
-//     if (!result.canceled) {
-//       setImage(result.assets[0]);
-//     }
-//   };
+    if (!result.canceled) {
+      setImage(result.assets[0]); 
+    }
+  };
 
-  // === Create Product ===
+  
   const createProduct = async () => {
     if (!form.name || !form.description || !form.price || !form.quality) {
       Alert.alert("Missing Fields", "Please fill all fields.");
@@ -53,45 +53,38 @@ export default function AddProduct() {
       const access = await AsyncStorage.getItem("access");
 
       const formData = new FormData();
-
       formData.append("name", form.name);
       formData.append("description", form.description);
       formData.append("price", form.price);
       formData.append("quality", form.quality);
 
-    //   if (image) {
-    //     formData.append("image", {
-    //       uri: image.uri,
-    //       type: "image/jpeg",
-    //       name: "product.jpg",
-    //     });
-    //   }
+      
+      if (image) {
+        formData.append("image", {
+          uri: image.uri,
+          name: `goods_${Date.now()}.jpg`,
+          type: "image/jpeg",
+        });
+      }
 
-      const response = await fetch(
-        `${URL}goods/create/`,
-        {
-          method: "POST",
-          headers: {
-            //   "Content-Type": "application/json",
-              "Content-Type": "multipart/form-data",
-              "Authorization": `Bearer ${access}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await apiFetch(`goods/create/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Authorization": `Bearer ${access}`,
+        },
+        body: formData,
+      });
 
       if (!response.ok) {
-        Alert.alert(
-          "Creation Failed",
-          `Status Code: ${response.status}`
-        );
+        Alert.alert("Creation Failed", `Status Code: ${response.status}`);
         setLoading(false);
         return;
       }
 
       Alert.alert("Success", "Product created successfully!");
       setForm({ name: "", description: "", price: "", quality: "" });
-    //   setImage(null);
+      setImage(null);
 
     } catch (error) {
       console.log(error);
@@ -131,26 +124,24 @@ export default function AddProduct() {
       <TextInput
         style={styles.input}
         placeholder="Quantity"
-        value={form.quantity}
+        value={form.quality}
         keyboardType="numeric"
         onChangeText={(text) => handleChange("quality", text)}
       />
 
-      {/* Image Picker */}
-      {/* <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
-        <Text style={styles.imageBtnText}>
-          {image ? "Change Image" : "Pick Image"}
-        </Text>
-      </TouchableOpacity> */}
+      
+      <TouchableOpacity style={styles.imageBtn} onPress={pickImage}>
+        <Text style={styles.imageBtnText}>Pick Product Image</Text>
+      </TouchableOpacity>
 
-      {/* {image && (
+      {image && (
         <Image
           source={{ uri: image.uri }}
-          style={{ width: "100%", height: 200, marginBottom: 20 }}
+          style={{ width: 150, height: 150, marginBottom: 10, borderRadius: 10 }}
         />
-      )} */}
+      )}
 
-      {/* Submit Button */}
+     
       <TouchableOpacity
         style={styles.submitBtn}
         onPress={createProduct}
@@ -165,45 +156,11 @@ export default function AddProduct() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    backgroundColor: "#fff",
-    flex: 1,
-  },
-  header: {
-    fontSize: 28,
-    fontWeight: "700",
-    marginBottom: 20,
-    textAlign: "center",
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: "#ccc",
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 14,
-    fontSize: 16,
-  },
-//   imageBtn: {
-//     backgroundColor: "#444",
-//     padding: 14,
-//     borderRadius: 10,
-//     marginBottom: 10,
-//   },
-//   imageBtnText: {
-//     color: "#fff",
-//     textAlign: "center",
-//     fontWeight: "600",
-//   },
-  submitBtn: {
-    backgroundColor: "#007AFF",
-    padding: 16,
-    borderRadius: 10,
-  },
-  submitText: {
-    color: "#fff",
-    textAlign: "center",
-    fontWeight: "700",
-    fontSize: 16,
-  },
+  container: { padding: 24, backgroundColor: "#fff", flex: 1 },
+  header: { fontSize: 28, fontWeight: "700", marginBottom: 20, textAlign: "center" },
+  input: { borderWidth: 1, borderColor: "#ccc", borderRadius: 10, padding: 12, marginBottom: 14, fontSize: 16 },
+  submitBtn: { backgroundColor: "#007AFF", padding: 16, borderRadius: 10 },
+  submitText: { color: "#fff", textAlign: "center", fontWeight: "700", fontSize: 16 },
+  imageBtn: { backgroundColor: "#34C759", padding: 12, borderRadius: 10, marginBottom: 10 },
+  imageBtnText: { color: "#fff", textAlign: "center", fontWeight: "700" },
 });

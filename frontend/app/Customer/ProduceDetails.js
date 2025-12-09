@@ -1,16 +1,17 @@
-import React, { useEffect, useState, useRef } from "react";
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Animated,
-} from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
+import {
+  Animated,
+  Image,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useCart } from "../context/Cart";
+import { apiFetch } from "../context/utils/api";
 
 export default function ProductDetails() {
   const { id } = useLocalSearchParams();
@@ -27,7 +28,7 @@ export default function ProductDetails() {
     const fetchProduct = async () => {
       try {
         const token = await AsyncStorage.getItem("access");
-        const res = await fetch(`${URL}goods/${id}/`, {
+        const res = await apiFetch(`goods/${id}/`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
         });

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { View, Text, Image, StyleSheet, ScrollView } from "react-native";
-import { useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams } from "expo-router";
+import React, { useEffect, useState } from "react";
+import { Image, ScrollView, StyleSheet, Text, View } from "react-native";
+import { apiFetch } from "../context/utils/api";
 
 export default function ProductDetails() {
-  const URL = process.env.EXPO_PUBLIC_BASE_URL
+  
   const { id } = useLocalSearchParams();
   const [product, setProduct] = useState(null);
 
@@ -12,7 +13,7 @@ export default function ProductDetails() {
     const fetchProduct = async () => {
       try {
         const token = await AsyncStorage.getItem("access");
-        const res = await fetch(`${URL}goods/${id}/`, {
+        const res = await apiFetch(`goods/${id}/`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 

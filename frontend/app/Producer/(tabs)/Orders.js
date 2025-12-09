@@ -9,34 +9,39 @@ import {
   TouchableOpacity,
   View
 } from 'react-native';
-
+import { apiFetch } from "../../context/utils/api";
 
 export default function Orders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const URL = process.env.EXPO_PUBLIC_BASE_URL;
-  const router = useRouter()
-  
+  const router = useRouter();
 
   const fetchOrders = async () => {
     try {
       const token = await AsyncStorage.getItem("access");
-      const response = await fetch(`${URL}goods/producer/order/`, {
+      const response = await apiFetch(`goods/producer/order/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-      const result = await response.json();
-      setOrders(result); 
-      for (const item of result) {
-        if (item.status==="PAID") {
-          console.log("Products: ", item)
 
+      const result = await response.json();
+
+     
+      const sorted = result.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+
+      setOrders(sorted);
+
+      for (const item of sorted) {
+        if (item.status === "PAID") {
+          console.log("PAID Order:", item);
         }
-        
       }
+
     } catch (e) {
       console.log(e);
     } finally {
@@ -65,25 +70,20 @@ export default function Orders() {
   };
 
   const renderOrder = ({ item }) => {
-   
-    if (item.status !== "PAID") {
-      return null;
-    }
-  
+    if (item.status !== "PAID") return null;
+
     return (
       <TouchableOpacity
         onPress={() => router.push(`Producer/OrdersDetails?id=${item.id}`)}
         style={styles.card}
       >
-        <View style={styles.card}>
-          <Text style={styles.orderId}>Order ID: {item.id}</Text>
-          <Text style={styles.date}>Date: {formatDateTime(item.created_at)}</Text>
-          <Text style={styles.status}>Status: {item.status}</Text>
-        </View>
+        <Text style={styles.orderId}>Order ID: {item.id}</Text>
+        <Text style={styles.date}>Date: {formatDateTime(item.created_at)}</Text>
+        <Text style={styles.status}>Status: {item.status}</Text>
       </TouchableOpacity>
     );
   };
-  
+
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -145,24 +145,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#007AFF',
     marginBottom: 8,
-  },
-  itemsContainer: {
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-    paddingTop: 8,
-  },
-  itemRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 4,
-  },
-  productName: {
-    fontSize: 14,
-    color: '#333',
-  },
-  quantity: {
-    fontSize: 14,
-    color: '#333',
   },
   loadingContainer: {
     flex: 1,

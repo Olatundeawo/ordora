@@ -11,8 +11,10 @@ from .serializers import GoodsSerializer, OrderSerializer, PaymentSerializer, Pr
 from django.http import HttpResponse
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from cloudinary import uploader
 
 from django.utils import timezone
+from django.utils.dateparse import parse_datetime
 
 
 
@@ -38,8 +40,19 @@ class GoodsUpdateView(generics.UpdateAPIView):
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_update(self, serializer):
-        if self.request.user != self.get_object().producer:
+        goods = self.get_object()
+        
+        if self.request.user != goods.producer:
             raise PermissionDenied("You can only update your own goods.")
+        
+        # If a new image is being uploaded, delete the old one
+        new_image = self.request.FILES.get('image')
+        if new_image and goods.image:
+            try:
+                uploader.destroy(goods.image.public_id)
+            except Exception as e:
+                print("Error deleting old image from Cloudinary:", e)
+        
         serializer.save()
 
 
@@ -160,11 +173,13 @@ def create_flutterwave_qr(request, order_id):
 
 @csrf_exempt
 def flutterwave_webhook(request):
+   
     signature = request.headers.get("verif-hash")
     if not settings.DEBUG:
         if signature != settings.FLUTTERWAVE_WEBHOOK_SECRET:
             return JsonResponse({"error": "Invalid signature"}, status=401)
 
+   
     payload = json.loads(request.body.decode("utf-8"))
     print("WEBHOOK RECEIVED:", payload)
 
@@ -176,11 +191,14 @@ def flutterwave_webhook(request):
 
     status = data.get("status")
     tx_ref = data.get("tx_ref")
+    amount_paid = data.get("amount")
+    currency_paid = data.get("currency")
+    flutterwave_timestamp = data.get("created_at")
 
-    # retrieve order id
+    
     order_id = data.get("meta", {}).get("order_id")
 
-    # fallback for bank_transfer or channels where meta is missing
+    
     if not order_id:
         try:
             order_id = tx_ref.split("-")[1]
@@ -190,30 +208,38 @@ def flutterwave_webhook(request):
     if status != "successful":
         return JsonResponse({"status": "ignored"}, status=200)
 
+   
     try:
         order = Order.objects.get(id=order_id)
         payment = Payment.objects.get(reference=tx_ref)
     except:
         return JsonResponse({"error": "Order/payment missing"}, status=404)
 
+   
+    if float(amount_paid) != float(order.total_price):
+        return JsonResponse({"error": "Amount mismatch"}, status=400)
+
+    if currency_paid != "NGN": 
+        return JsonResponse({"error": "Currency mismatch"}, status=400)
+
+    
     payment.status = "paid"
-    payment.paid_at = timezone.now()
+    if flutterwave_timestamp:
+        payment.paid_at = parse_datetime(flutterwave_timestamp)
+    else:
+        payment.paid_at = timezone.now()
+        
     payment.save()
 
     order.status = "PAID"
     order.save()
 
+   
     for item in order.items.all():
         item.product.quality -= item.quality
         item.product.save()
-        # wallet, _ = ProducerWallet.objects.get_or_create(
-        #     producer=item.producer
-        # )
-        # wallet.balance += payment.amount
-        # wallet.save()
 
     return JsonResponse({"status": "success"}, status=200)
-
 
 
 

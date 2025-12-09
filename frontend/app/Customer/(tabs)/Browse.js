@@ -1,47 +1,51 @@
-import React, { useEffect, useState } from "react";
 import { useRouter } from "expo-router";
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  FlatList,
   ActivityIndicator,
+  FlatList,
+  Image,
   RefreshControl,
   StyleSheet,
-  TouchableOpacity
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-
+import { apiFetch } from "../../context/utils/api";
 
 export default function GoodsList() {
-  const URL = process.env.EXPO_PUBLIC_BASE_URL
-  const router = useRouter()
+  const router = useRouter();
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchGoods = async () => {
     try {
-      
-      const res = await fetch(`${URL}goods/`, {
+      const res = await apiFetch(`goods/`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
-          
         },
       });
-
-      if (!res.ok) throw new Error("Network response not ok");
-
+  
+      if (!res.ok) throw new Error("Network error");
+  
       const json = await res.json();
-      setData(json);
+  
+      // 🔥 Sort newest first
+      const sortedData = json.sort(
+        (a, b) => new Date(b.created_at) - new Date(a.created_at)
+      );
+  
+      setData(sortedData);
     } catch (error) {
-      console.log("Error fetching goods:", error);
+      console.log("Error:", error);
       setData([]);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
-
+  
   useEffect(() => {
     fetchGoods();
   }, []);
@@ -64,25 +68,49 @@ export default function GoodsList() {
       {data && data.length > 0 ? (
         <FlatList
           data={data}
+          numColumns={2}  // 🔥 GRID LAYOUT
+          columnWrapperStyle={{ justifyContent: "space-between" }}
           keyExtractor={(item) => item.id.toString()}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          contentContainerStyle={{ paddingBottom: 20 }}
+          contentContainerStyle={{ paddingBottom: 80 }}
           renderItem={({ item }) => (
-            <TouchableOpacity style={styles.card} onPress={() => router.push(`/Customer/ProduceDetails?id=${item.id}`)}>
-            
+            <TouchableOpacity
+              style={styles.card}
+              onPress={() =>
+                router.push(`/Customer/ProduceDetails?id=${item.id}`)
+              }
+            >
+              {/* PRODUCT IMAGE */}
+              {item.image ? (
+                <Image
+                  source={{ uri: item.image }}
+                  style={styles.image}
+                />
+              ) : (
+                <View style={styles.placeholder}>
+                  <Text style={styles.placeholderText}>No Image</Text>
+                </View>
+              )}
+
               <View style={styles.cardContent}>
-                <Text style={styles.title}>{item.name}</Text>
-                <Text style={styles.price}>Price: ${item.price}</Text>
-                <Text style={styles.quantity}>Quantity: {item.quality}</Text>
+                <Text style={styles.title} numberOfLines={1}>
+                  {item.name}
+                </Text>
+
+                <Text style={styles.price} numberOfLines={1}>
+                  ₦{item.price}
+                </Text>
+
+                <Text style={styles.quantity}>Qty: {item.quality}</Text>
               </View>
             </TouchableOpacity>
           )}
         />
       ) : (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>No Goods available now.</Text>
+          <Text style={styles.emptyText}>No Goods available yet.</Text>
         </View>
       )}
     </View>
@@ -92,48 +120,68 @@ export default function GoodsList() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FA",
+    backgroundColor: "#F5F7FA",
     padding: 16,
   },
+
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
   },
+
   card: {
     backgroundColor: "#fff",
-    borderRadius: 12,
-    marginBottom: 16,
+    width: "48%",
+    borderRadius: 14,
+    marginBottom: 20,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3, // for Android shadow
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 4,
   },
+
   image: {
     width: "100%",
-    height: 180,
+    height: 140,
     resizeMode: "cover",
+    backgroundColor: "#eee",
   },
+
+  placeholder: {
+    height: 140,
+    backgroundColor: "#EAECEF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  placeholderText: {
+    color: "#777",
+    fontSize: 14,
+  },
+
   cardContent: {
-    padding: 12,
+    padding: 10,
   },
+
   title: {
-    fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "600",
+    fontSize: 15,
     color: "#333",
-    marginBottom: 6,
   },
   price: {
     fontSize: 16,
-    color: "#007BFF",
-    marginBottom: 4,
+    color: "#0A84FF",
+    fontWeight: "700",
+    marginTop: 4,
   },
   quantity: {
-    fontSize: 14,
-    color: "#555",
+    fontSize: 13,
+    color: "#888",
+    marginTop: 4,
   },
+
   emptyContainer: {
     flex: 1,
     justifyContent: "center",
