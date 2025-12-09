@@ -2,33 +2,44 @@
   "expo": {
     "name": "Ordora",
     "slug": "Ordora",
-    "platforms": [
-      "ios",
-      "android",
-      "web"
-    ],
+    "platforms": ["ios", "android", "web"],
     "version": "1.0.0",
     "runtimeVersion": {
       "policy": "sdkVersion"
     },
     "orientation": "portrait",
+
+    /* APP ICON */
     "icon": "./assets/images/splash-icon.png",
+
+    /* REQUIRED FOR CUSTOM SPLASH */
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "backgroundColor": "#232323",
+      "resizeMode": "contain"
+    },
+
     "scheme": "frontend",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+
     "ios": {
       "supportsTablet": true
     },
+
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/splash-icon.png",
         "backgroundColor": "#E6F4FE"
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
+
     "web": {
       "output": "static"
     },
+
     "plugins": [
       "expo-router",
       [
@@ -44,17 +55,21 @@
         }
       ]
     ],
+
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
     },
+
     "extra": {
       "router": {},
       "eas": {
         "projectId": "1e8b5862-fc63-47bf-a461-a00b31afdbf5"
       }
     },
+
     "owner": "olatundeawo",
+
     "updates": {
       "url": "https://u.expo.dev/1e8b5862-fc63-47bf-a461-a00b31afdbf5"
     }

@@ -30,60 +30,67 @@ export default function Login() {
   };
 
   const handleSubmit = async () => {
-
+    if (loading) return; 
     setLoading(true);
-    
+  
     try {
-
-      const response = await fetch(
-       `${URL}auth/login/`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json", },
-          body: JSON.stringify({
-            email: form.email,
-            password: form.password,
-          }),
-        }
-      );
-
+      const response = await fetch(`${URL}auth/login/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: form.email.trim(),
+          password: form.password,
+        }),
+      });
+  
+      
+      if (!response) {
+        throw new Error("Server unreachable");
+      }
+  
       const result = await response.json();
+  
       if (!response.ok) {
-        Alert.alert("Login Failed", result?.non_field_errors?.[0] || result?.email?.[0] || "Something went wrong");
-        setLoading(false);
+        Alert.alert(
+          "Login Failed",
+          result?.non_field_errors?.[0] ||
+          result?.email?.[0] ||
+          result?.password?.[0] ||
+          "Invalid email or password"
+        );
         return;
       }
-
-
+  
       // Save tokens
       await AsyncStorage.setItem("access", result.access);
       await AsyncStorage.setItem("refresh", result.refresh);
-
-      // Extract role
-      const userData = result.user; 
-      console.log("USER ROLE:", userData.role);
-
-      // Save user globally
+  
+      const userData = result.user;
+  
       setUser({
         ...userData,
         token: result.access,
       });
-      
+  
       Alert.alert("Success", "Login successful!");
-
-      
+  
       if (userData.role === "producer") {
         router.replace("/Producer/(tabs)/Dashboard");
       } else {
         router.replace("/Customer/(tabs)/Browse");
       }
-    } catch (e) {
-      console.error(e);
-      Alert.alert("Network Error", "Unable to connect to the server.");
+  
+    } catch (error) {
+      console.log("NETWORK ERROR:", error);
+      Alert.alert(
+        "Network Error",
+        "Unable to reach the server. Please check your internet or server status."
+      );
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <KeyboardAvoidingView
@@ -118,9 +125,16 @@ export default function Login() {
         />
       </View>
 
-      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
-        <Text style={styles.buttonText}>{loading ? "Login..." : "Login"}</Text>
+      <TouchableOpacity
+        style={[styles.button, loading && styles.buttonDisabled]}
+        onPress={handleSubmit}
+        disabled={loading}
+      >
+        <Text style={styles.buttonText}>
+          {loading ? "Please wait..." : "Login"}
+        </Text>
       </TouchableOpacity>
+
 
       <Text style={styles.footerText}>
         Don’t have an account?{" "}
@@ -192,4 +206,7 @@ const styles = StyleSheet.create({
     color: "#007AFF",
     fontWeight: "700",
   },
+  buttonDisabled: {
+    backgroundColor: "#9EC9FF",
+  },  
 });

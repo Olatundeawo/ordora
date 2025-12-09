@@ -31,7 +31,7 @@ export default function GoodsList() {
   
       const json = await res.json();
   
-      // 🔥 Sort newest first
+   
       const sortedData = json.sort(
         (a, b) => new Date(b.created_at) - new Date(a.created_at)
       );
@@ -68,7 +68,7 @@ export default function GoodsList() {
       {data && data.length > 0 ? (
         <FlatList
           data={data}
-          numColumns={2}  // 🔥 GRID LAYOUT
+          numColumns={2}  
           columnWrapperStyle={{ justifyContent: "space-between" }}
           keyExtractor={(item) => item.id.toString()}
           refreshControl={
