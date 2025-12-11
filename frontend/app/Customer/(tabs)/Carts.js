@@ -1,21 +1,17 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useState } from "react";
+import LottieView from "lottie-react-native";
+
 import {
   ActivityIndicator,
   FlatList,
   Image,
   Modal,
-  Platform,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
-
-const Lottie = Platform.OS === "web"
-  ? require("lottie-react").default
-  : require("lottie-react-native");
 
 import { useCart } from "../../context/Cart";
 import { apiFetch } from "../../context/utils/api";
@@ -130,7 +126,7 @@ export default function CartScreen() {
       {/* Success Animation */}
       <Modal transparent visible={successVisible} animationType="fade">
         <View style={styles.modalContainer}>
-          <Lottie
+          <LottieView
             source={Success}
             autoPlay
             loop={false}
